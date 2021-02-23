@@ -3,16 +3,6 @@ import GLObject from './GLObject';
 import Polygon from './Polygon';
 import Renderer from './renderer';
 
-const colors = [
-    [ 0.0, 0.0, 0.0, 1.0 ],  // black
-    [ 1.0, 0.0, 0.0, 1.0 ],  // red
-    [ 1.0, 1.0, 0.0, 1.0 ],  // yellow
-    [ 0.0, 1.0, 0.0, 1.0 ],  // green
-    [ 0.0, 0.0, 1.0, 1.0 ],  // blue
-    [ 1.0, 0.0, 1.0, 1.0 ],  // magenta
-    [ 0.0, 1.0, 1.0, 1.0 ]   // cyan
-];
-
 const Tool = {
     "DRAW" : 0,
     "MOVE" : 1
@@ -36,7 +26,7 @@ window.onload = function() {
     // html element reference
     var toolPicker = document.getElementById('tool-picker') as HTMLSelectElement;
     var shapePicker = document.getElementById('shape-picker') as HTMLSelectElement;
-    var colorPicker = document.getElementById('color-picker') as HTMLSelectElement;
+    var colorPicker = document.getElementById('color-picker') as HTMLInputElement;
 
     // tool variables
     var currentTool : number;
@@ -54,8 +44,14 @@ window.onload = function() {
     shapePicker.onclick = function () {
         currentShape = shapePicker.selectedIndex;
     };
-    colorPicker.onclick = function () {
-        currentColor = colors[colorPicker.selectedIndex];
+    colorPicker.oninput = function () {
+        const colStr = colorPicker.value.match(/[\d\w]{1,2}/g);
+        currentColor = [
+            parseInt(colStr[0], 16)/255,
+            parseInt(colStr[1], 16)/255,
+            parseInt(colStr[2], 16)/255,
+            1
+        ]
     };
 
     async function main() {
