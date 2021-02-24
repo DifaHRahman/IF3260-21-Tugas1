@@ -13,6 +13,10 @@ class GLObject {
         this.col = [1.0, 1.0, 1.0, 1.0];
     }
 
+    getId(){
+        return this.id;
+    }
+
     getDrawType() {
         return this.gl.TRIANGLES;
     }
