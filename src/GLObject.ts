@@ -4,7 +4,6 @@ class GLObject {
     public shader: WebGLProgram;
     public gl: WebGL2RenderingContext;
     public col: number[];
-    public pts: number[];
 
     constructor(id: number, shader: WebGLProgram, gl: WebGL2RenderingContext) {
         this.id = id;
@@ -25,11 +24,6 @@ class GLObject {
         return "GLObject";
     }
 
-    setPoints(pts: number[]) {
-        this.pts = pts;
-        this.va = pts;
-    }
-
     setVertexArray(va: number[]) {
         this.va = va;
     }
@@ -39,8 +33,6 @@ class GLObject {
     }
 
     onPointDrag(point: number, position: {x : number, y : number}) {
-        this.pts[point * 2] = position.x;
-        this.pts[point * 2 + 1] = position.y;
         this.va[point * 2] = position.x;
         this.va[point * 2 + 1] = position.y;
     }

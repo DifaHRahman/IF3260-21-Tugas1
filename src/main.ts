@@ -4,7 +4,7 @@ import Polygon from './Polygon';
 import Line from './Line';
 import Square from './Square';
 import Renderer from './renderer';
-import { saveJSON } from './utils/fileIO';
+import { saveJSON, loadJSON } from './utils/fileIO';
 
 const Tool = {
   DRAW: 0,
@@ -36,6 +36,8 @@ window.onload = function () {
   var drawPBtn = document.getElementById(
     "draw-polygon-btn"
   ) as HTMLButtonElement;
+  var saveBtn = document.getElementById("save-model-btn") as HTMLButtonElement;
+  var loadInput = document.getElementById("load-model") as HTMLInputElement;
 
   // tool variables
   var currentTool: number;
@@ -114,19 +116,19 @@ window.onload = function () {
     // renderer.addObject(glObject4)
 
     const glObject5 = new Polygon(1, shaderProgram, gl);
-    glObject5.setPoints([100, 50, 300, 50, 370, 250, 200, 370, 30, 250]);
+    glObject5.setVertexArray([100, 50, 300, 50, 370, 250, 200, 370, 30, 250]);
     glObject5.setColorArray([0.251, 0.624, 1.0, 1.0]);
     renderer.addObject(glObject5);
     objects.push(glObject5);
 
     const glObjectLine = new Line(2, shaderProgram, gl);
-    glObjectLine.setPoints([100, 50, 300, 75]);
+    glObjectLine.setVertexArray([100, 50, 300, 75]);
     glObjectLine.setColorArray([1, 0, 0, 1]);
     renderer.addObject(glObjectLine);
     objects.push(glObjectLine);
 
     const glObjectSquare = new Square(0, shaderProgram, gl);
-    glObjectSquare.setPoints([100, 100, 300, 100, 300, 300, 100, 300]);
+    glObjectSquare.setVertexArray([100, 100, 300, 100, 300, 300, 100, 300]);
     glObjectSquare.setColorArray([0, 1, 0, 1]);
     renderer.addObject(glObjectSquare);
     objects.push(glObjectSquare);
@@ -143,11 +145,19 @@ window.onload = function () {
       }
     });
 
+    saveBtn.addEventListener("click", function () {
+      saveJSON(objects);
+    });
+
+    loadInput.addEventListener("change", function(e) {
+      loadJSON(e.target.files[0], objects, shaderProgram, gl, renderer);
+    })
+
     canvas.addEventListener("mousedown", function (e) {
       if (doneDrawing) {
-        if (Shape.LINE) {
+        if (currentShape == Shape.LINE) {
           drawShape(new Line(id, shaderProgram, gl), drawnVert);
-        } else if (Shape.SQUARE) {
+        } else if (currentShape == Shape.SQUARE) {
           let vertArray = [];
           vertArray.push(drawnVert[0]);
           vertArray.push(drawnVert[1]);
@@ -213,7 +223,7 @@ window.onload = function () {
 
   main();
 
-  canvas.onmousedown = function (event) {
+  canvas.addEventListener("mousedown", function (event) {
     const bound = canvas.getBoundingClientRect();
     const mousePos = {
       x: event.clientX - bound.left,
@@ -234,7 +244,7 @@ window.onload = function () {
     }
 
     mouseIsDown = true;
-  };
+  });
 
   canvas.onmousemove = function (event) {
     const bound = canvas.getBoundingClientRect();
@@ -305,9 +315,9 @@ window.onload = function () {
     let nearestPoint: number;
 
     objects.forEach((object) => {
-      for (let i = 0; i < object.pts.length / 2; i++) {
+      for (let i = 0; i < object.va.length / 2; i++) {
         console.log("test");
-        const pt = { x: object.pts[2 * i], y: object.pts[2 * i + 1] };
+        const pt = { x: object.va[2 * i], y: object.va[2 * i + 1] };
         let distanceSquared =
           Math.pow(mPos.x - pt.x, 2) + Math.pow(mPos.y - pt.y, 2);
         if (nearestDistanceSquared > distanceSquared) {
@@ -328,7 +338,7 @@ window.onload = function () {
   }
 
   function drawShape(newObj, vertList) {
-    newObj.setPoints(vertList);
+    newObj.setVertexArray(vertList);
     newObj.setColorArray(currentColor);
     renderer.addObject(newObj);
     objects.push(newObj);

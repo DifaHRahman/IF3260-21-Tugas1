@@ -5,6 +5,10 @@ class Square extends GLObject {
     return this.gl.TRIANGLE_FAN;
   }
 
+  getObjectType() : string {
+    return "Square";
+  }
+
   onPointDrag(point: number, position: { x: number; y: number }) {
     let heightDiff = position.y - this.va[point * 2 + 1];
 
