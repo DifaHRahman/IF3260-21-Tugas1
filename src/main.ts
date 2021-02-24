@@ -2,6 +2,7 @@ import { initShaderFiles } from './utils/shader';
 import GLObject from './GLObject';
 import Polygon from './Polygon';
 import Line from './Line';
+import Square from './Square';
 import Renderer from './renderer';
 import { saveJSON } from './utils/fileIO';
 
@@ -120,6 +121,12 @@ window.onload = function() {
         glObjectLine.setColorArray([1,0,0,1]);
         renderer.addObject(glObjectLine);
         objects.push(glObjectLine);
+
+        const glObjectSquare = new Square(0, shaderProgram, gl);
+        glObjectSquare.setPoints([100, 100, 300, 100, 300, 300, 100, 300]);
+        glObjectSquare.setColorArray([0, 1, 0, 1]);
+        renderer.addObject(glObjectSquare);
+        objects.push(glObjectSquare);
 
         drawPBtn.addEventListener("click", function(e){
             // Button to trigger polygon drawing.
