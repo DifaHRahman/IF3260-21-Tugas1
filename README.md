@@ -2,7 +2,7 @@
 Tugas 1 IF3260 - 2D Web-Based CAD
 
 ## Deskripsi Program
-Aplikasi WebGL ini merupakan aplikasi menggambar model kebutuhan denah yang dibangun menggunakan WebGL murni tanpa library atau framework tambahan. Model yang dapat digambar dengan aplikasi ini terdiri dari garis (line), persegi atau segi empat sama sisi (square), dan poligon (polygon). Model yang dibuat memiliki warna sesuai dengan masukan dari pengguna. Dalam menggunakan aplikasi ini, pengguna dapat melakukan interaksi yang memungkinkan untuk melakukan hal-hal berikut.
+Aplikasi WebGL ini merupakan aplikasi menggambar model kebutuhan denah yang dibangun menggunakan WebGL murni tanpa library atau framework tambahan. Model yang dapat digambar dengan aplikasi ini terdiri dari garis (line), persegi atau segi empat sama sisi (square), dan poligon (polygon). Model yang dibuat memiliki warna sesuai dengan masukan dari pengguna. Dalam menggunakan aplikasi ini, pengguna dapat melakukan interaksi yang memungkinkan untuk melakukan hal-hal berikut:
 
 - Membuat model
 - Menggeser titik simpul dari model dengan mouse
