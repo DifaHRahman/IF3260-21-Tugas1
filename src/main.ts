@@ -91,48 +91,6 @@ window.onload = function () {
 
     currentColor = [0, 0, 0, 1];
 
-    //renderer = new Renderer()
-
-    // const glObject = new GLObject(0, shaderProgram, gl)
-    // glObject.setVertexArray(triangleData)
-    // glObject.setColorArray([1.0, 0.0, 0.0, 1.0])
-    // renderer.addObject(glObject)
-
-    // const glObject2 = new GLObject(1, shaderProgram, gl)
-    // glObject2.setVertexArray([400, 0, 400, 200, 200, 0])
-    // glObject2.setPoints([400, 0, 400, 200, 200, 0])
-    // glObject2.setColorArray([0.0, 1.0, 0.0, 1.0])
-    // renderer.addObject(glObject2)
-    // objects.push(glObject2);
-
-    // const glObject3 = new GLObject(1, shaderProgram, gl)
-    // glObject3.setVertexArray([200, 200, 0, 200, 200, 0])
-    // glObject3.setColorArray([0.0, 0.0, 1.0, 1.0])
-    // renderer.addObject(glObject3)
-
-    // const glObject4 = new GLObject(1, shaderProgram, gl)
-    // glObject4.setVertexArray([0, 400, 0, 200, 200, 400])
-    // glObject4.setColorArray([1.0, 1.0, 0.0, 1.0])
-    // renderer.addObject(glObject4)
-
-    const glObject5 = new Polygon(1, shaderProgram, gl);
-    glObject5.setVertexArray([100, 50, 300, 50, 370, 250, 200, 370, 30, 250]);
-    glObject5.setColorArray([0.251, 0.624, 1.0, 1.0]);
-    renderer.addObject(glObject5);
-    objects.push(glObject5);
-
-    const glObjectLine = new Line(2, shaderProgram, gl);
-    glObjectLine.setVertexArray([100, 50, 300, 75]);
-    glObjectLine.setColorArray([1, 0, 0, 1]);
-    renderer.addObject(glObjectLine);
-    objects.push(glObjectLine);
-
-    const glObjectSquare = new Square(0, shaderProgram, gl);
-    glObjectSquare.setVertexArray([100, 100, 300, 100, 300, 300, 100, 300]);
-    glObjectSquare.setColorArray([0, 1, 0, 1]);
-    renderer.addObject(glObjectSquare);
-    objects.push(glObjectSquare);
-
     drawPBtn.addEventListener("click", function (e) {
       // Button to trigger polygon drawing.
       if (currentTool == Tool.DRAW && currentShape == Shape.POLYGON) {
