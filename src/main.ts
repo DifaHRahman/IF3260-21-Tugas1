@@ -27,6 +27,7 @@ window.onload = function() {
     var toolPicker = document.getElementById('tool-picker') as HTMLSelectElement;
     var shapePicker = document.getElementById('shape-picker') as HTMLSelectElement;
     var colorPicker = document.getElementById('color-picker') as HTMLInputElement;
+    var drawPBtn = document.getElementById('draw-polygon-btn') as HTMLButtonElement;
 
     // tool variables
     var currentTool : number;
@@ -37,6 +38,11 @@ window.onload = function() {
 
     // input variables
     var mouseIsDown;
+    var drawnObj;
+    var drawnVert = []
+    var id=2;
+
+    const renderer = new Renderer();
 
     toolPicker.onclick = function () {
         currentTool = toolPicker.selectedIndex;
@@ -70,9 +76,10 @@ window.onload = function() {
         const yellowShader = await initShaderFiles(gl, 'vert.glsl', 'frag-yellow.glsl');
 
         gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
-
         
-        const renderer = new Renderer()
+        currentColor = [0,0,0,1];
+        
+        //renderer = new Renderer()
         
         // const glObject = new GLObject(0, shaderProgram, gl)
         // glObject.setVertexArray(triangleData)
@@ -101,6 +108,25 @@ window.onload = function() {
         glObject5.setColorArray([0.251, 0.624, 1.0, 1.0]);
         renderer.addObject(glObject5);
         objects.push(glObject5);
+
+
+        drawPBtn.addEventListener("click", function(e){
+            // Button to trigger polygon drawing.
+            if (currentTool == Tool.DRAW && currentShape == Shape.POLYGON){
+                if(drawnVert.length < 6){
+                    alert("Letakan 3 titik atau lebih untuk membuat polygon.");
+                } else {
+                    drawnObj = new Polygon(id, shaderProgram, gl);
+                    drawnObj.setPoints(drawnVert);
+                    drawnObj.setColorArray(currentColor);
+                    renderer.addObject(drawnObj);
+                    objects.push(drawnObj);
+                    id++;
+                }
+                drawnVert = [];
+            }
+            
+        });
         
         function render(now: number) {
             gl.clearColor(1,1,1,1);
@@ -124,7 +150,14 @@ window.onload = function() {
         console.log(mousePos);
 
         if (currentTool === Tool.MOVE) {
+            if (currentShape === Shape.LINE || currentShape === Shape.SQUARE){
+                drawnVert = [];
+            }
             onMoveStart(mousePos);
+        }
+
+        if (currentTool === Tool.DRAW){
+            onDrawStart(mousePos);
         }
     
         mouseIsDown = true;
@@ -157,7 +190,9 @@ window.onload = function() {
 
     function onDrawStart(mousePos : { x:number, y:number }) {
         if (currentShape === Shape.POLYGON) {
-            
+            drawnVert.push(mousePos.x);
+            drawnVert.push(mousePos.y);
+            //console.log(drawnVert);
         }
     }
 
