@@ -27,6 +27,10 @@ class Polygon extends GLObject {
         return this.gl.TRIANGLE_STRIP;
     }
 
+    getObjectType() : string {
+        return "Polygon";
+    }
+
     onPointDrag(point: number, position: {x : number, y : number}) {
         this.pts[point * 2] = position.x;
         this.pts[point * 2 + 1] = position.y;

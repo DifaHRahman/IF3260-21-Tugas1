@@ -17,6 +17,10 @@ class GLObject {
         return this.gl.TRIANGLES;
     }
 
+    getObjectType() : string {
+        return "GLObject";
+    }
+
     setPoints(pts: number[]) {
         this.pts = pts;
         this.va = pts;

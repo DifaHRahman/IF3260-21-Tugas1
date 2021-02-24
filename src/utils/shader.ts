@@ -1,4 +1,4 @@
-export const loadShader = async (gl: WebGL2RenderingContext, type: number, source: string) => {
+export async function loadShader (gl: WebGL2RenderingContext, type: number, source: string) {
     const rawShader = await fetchShader(source)
     const shader = gl.createShader(type)
     gl.shaderSource(shader, rawShader)

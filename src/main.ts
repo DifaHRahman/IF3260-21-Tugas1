@@ -3,6 +3,7 @@ import GLObject from './GLObject';
 import Polygon from './Polygon';
 import Line from './Line';
 import Renderer from './renderer';
+import { saveJSON } from './utils/fileIO';
 
 const Tool = {
     "DRAW" : 0,
@@ -29,6 +30,7 @@ window.onload = function() {
     var shapePicker = document.getElementById('shape-picker') as HTMLSelectElement;
     var colorPicker = document.getElementById('color-picker') as HTMLInputElement;
     var drawPBtn = document.getElementById('draw-polygon-btn') as HTMLButtonElement;
+    var saveBtn = document.getElementById('save-model-btn') as HTMLButtonElement;
 
     // tool variables
     var currentTool : number;
@@ -130,6 +132,10 @@ window.onload = function() {
             }
             
         });
+
+        saveBtn.onclick = function () {
+            saveJSON(objects);
+        }
 
         canvas.addEventListener("mousedown", function(e){
             if (doneDrawing){
