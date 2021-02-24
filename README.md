@@ -35,5 +35,7 @@ Terdapat fitur help yang akan menjelaskan cara penggunaan aplikasi.
 
 ## Author
 13518089 - Annisa Rahim
+
 13518098 - Difa Habiba Rahman
+
 13518107 - Chokyi Ozer
