@@ -6,7 +6,8 @@ import Renderer from './renderer';
 
 const Tool = {
     "DRAW" : 0,
-    "MOVE" : 1
+    "MOVE" : 1,
+    "COLOR" : 2
 }
 
 const Shape = {
@@ -40,7 +41,7 @@ window.onload = function() {
     // input variables
     var mouseIsDown;
     var drawnVert = []
-    var id=2;
+    var id=3;
     var doneDrawing = false;
 
     const renderer = new Renderer();
@@ -112,7 +113,7 @@ window.onload = function() {
         renderer.addObject(glObject5);
         objects.push(glObject5);
 
-        const glObjectLine = new Line(0, shaderProgram, gl);
+        const glObjectLine = new Line(2, shaderProgram, gl);
         glObjectLine.setPoints([100, 50, 300, 75]);
         glObjectLine.setColorArray([1,0,0,1]);
         renderer.addObject(glObjectLine);
@@ -123,7 +124,7 @@ window.onload = function() {
             if (currentTool == Tool.DRAW && currentShape == Shape.POLYGON){
                 if(drawnVert.length < 6){
                     alert("Letakan 3 titik atau lebih untuk membuat polygon.");
-                    drawnVert = [];
+                    resetDrawingTool();
                 } else {
                     drawShape(new Polygon(id, shaderProgram, gl), drawnVert);
                 }
@@ -159,14 +160,15 @@ window.onload = function() {
         console.log(mousePos);
 
         if (currentTool === Tool.MOVE) {
-            if (currentShape === Shape.LINE || currentShape === Shape.SQUARE){
-                drawnVert = [];
-            }
             onMoveStart(mousePos);
         }
 
         if (currentTool === Tool.DRAW){
             onDrawStart(mousePos);
+        }
+
+        if (currentTool === Tool.COLOR){
+            onColoring(mousePos);
         }
     
         mouseIsDown = true;
@@ -211,6 +213,26 @@ window.onload = function() {
     }
 
     function onMoveStart(mousePos : { x:number, y:number }) {
+        findNearest(mousePos);
+    }
+
+    function onMoveHold(mousePos : { x:number, y:number }) {
+        if (selectedObject !== undefined) {
+            selectedObject.onPointDrag(selectedPoint, mousePos);
+        }
+    }
+
+    function onColoring(mousePos : {x:number, y:number}){
+        findNearest(mousePos);
+
+        if (selectedObject !== undefined){
+            selectedObject.setColorArray(currentColor);
+        } else {
+            alert("Pilih titik dari bentuk yang ingin diwarnai.")
+        }
+    }
+
+    function findNearest(mPos : { x:number, y:number }){
         const nearestDistance = 30;
         let nearestDistanceSquared: number = nearestDistance * nearestDistance;
         let nearestObject: GLObject;
@@ -220,7 +242,7 @@ window.onload = function() {
             for (let i = 0; i < object.pts.length / 2; i++) {
                 console.log("test");
                 const pt = { x: object.pts[2*i], y: object.pts[2*i+1] };
-                let distanceSquared = Math.pow(mousePos.x - pt.x, 2) + Math.pow(mousePos.y - pt.y, 2);
+                let distanceSquared = Math.pow(mPos.x - pt.x, 2) + Math.pow(mPos.y - pt.y, 2);
                 if (nearestDistanceSquared > distanceSquared) {
                     nearestDistanceSquared = distanceSquared;
                     nearestObject = object;
@@ -228,17 +250,13 @@ window.onload = function() {
                 }
             }
         });
-
+        console.log("well", selectedObject);
+        
         selectedObject = nearestObject;
         selectedPoint = nearestPoint;
 
         console.log("Nearest Object: " + nearestObject + " Nearest point: " + nearestPoint);
-    }
-
-    function onMoveHold(mousePos : { x:number, y:number }) {
-        if (selectedObject !== undefined) {
-            selectedObject.onPointDrag(selectedPoint, mousePos);
-        }
+    
     }
 
     function drawShape(newObj, vertList){
