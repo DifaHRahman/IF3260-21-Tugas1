@@ -1,275 +1,337 @@
-import { initShaderFiles } from './utils/shader';
-import GLObject from './GLObject';
-import Polygon from './Polygon';
-import Line from './Line';
-import Renderer from './renderer';
+import { initShaderFiles } from "./utils/shader";
+import GLObject from "./GLObject";
+import Polygon from "./Polygon";
+import Line from "./Line";
+import Square from "./Square";
+
+import Renderer from "./renderer";
 
 const Tool = {
-    "DRAW" : 0,
-    "MOVE" : 1,
-    "COLOR" : 2
-}
+  DRAW: 0,
+  MOVE: 1,
+  COLOR: 2,
+};
 
 const Shape = {
-    "LINE" : 0,
-    "SQUARE" : 1,
-    "POLYGON" : 2
-}
+  LINE: 0,
+  SQUARE: 1,
+  POLYGON: 2,
+};
 
-window.onload = function() {
-    var canvas = document.getElementById('gl-canvas') as HTMLCanvasElement;
-    canvas.width = 400;
-    canvas.height = 400;
-    
-    var gl = canvas.getContext('webgl2') as WebGL2RenderingContext;
+window.onload = function () {
+  var canvas = document.getElementById("gl-canvas") as HTMLCanvasElement;
+  canvas.width = 400;
+  canvas.height = 400;
 
-    var objects : GLObject[] = [];
+  var gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
 
-    // html element reference
-    var toolPicker = document.getElementById('tool-picker') as HTMLSelectElement;
-    var shapePicker = document.getElementById('shape-picker') as HTMLSelectElement;
-    var colorPicker = document.getElementById('color-picker') as HTMLInputElement;
-    var drawPBtn = document.getElementById('draw-polygon-btn') as HTMLButtonElement;
+  var objects: GLObject[] = [];
 
-    // tool variables
-    var currentTool : number;
-    var currentShape : number;
-    var currentColor : number[];
-    var selectedObject : GLObject;
-    var selectedPoint : number;
+  // html element reference
+  var toolPicker = document.getElementById("tool-picker") as HTMLSelectElement;
+  var shapePicker = document.getElementById(
+    "shape-picker"
+  ) as HTMLSelectElement;
+  var colorPicker = document.getElementById("color-picker") as HTMLInputElement;
+  var drawPBtn = document.getElementById(
+    "draw-polygon-btn"
+  ) as HTMLButtonElement;
 
-    // input variables
-    var mouseIsDown;
-    var drawnVert = []
-    var id=3;
-    var doneDrawing = false;
+  // tool variables
+  var currentTool: number;
+  var currentShape: number;
+  var currentColor: number[];
+  var selectedObject: GLObject;
+  var selectedPoint: number;
 
-    const renderer = new Renderer();
+  // input variables
+  var mouseIsDown;
+  var drawnVert = [];
+  var id = 3;
+  var doneDrawing = false;
 
-    toolPicker.onclick = function () {
-        currentTool = toolPicker.selectedIndex;
-        resetDrawingTool();
-    };
-    shapePicker.onclick = function () {
-        currentShape = shapePicker.selectedIndex;
-        resetDrawingTool();
-    };
-    colorPicker.oninput = function () {
-        const colStr = colorPicker.value.match(/[\d\w]{1,2}/g);
-        currentColor = [
-            parseInt(colStr[0], 16)/255,
-            parseInt(colStr[1], 16)/255,
-            parseInt(colStr[2], 16)/255,
-            1
-        ]
-    };
+  const renderer = new Renderer();
 
-    async function main() {
-        if (!gl) {
-            alert('Your browser does not support WebGL')
-            return
-        };
-        
-        const triangleData = [
-            200.0, 200.0,
-            400.0, 200.0,
-            200.0, 400.0
-        ];
+  toolPicker.onclick = function () {
+    currentTool = toolPicker.selectedIndex;
+    resetDrawingTool();
+  };
+  shapePicker.onclick = function () {
+    currentShape = shapePicker.selectedIndex;
+    resetDrawingTool();
+  };
+  colorPicker.oninput = function () {
+    const colStr = colorPicker.value.match(/[\d\w]{1,2}/g);
+    currentColor = [
+      parseInt(colStr[0], 16) / 255,
+      parseInt(colStr[1], 16) / 255,
+      parseInt(colStr[2], 16) / 255,
+      1,
+    ];
+  };
 
-        const shaderProgram = await initShaderFiles(gl, 'vert.glsl', 'frag.glsl');
-        const yellowShader = await initShaderFiles(gl, 'vert.glsl', 'frag-yellow.glsl');
-
-        gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
-        
-        currentColor = [0,0,0,1];
-        
-        //renderer = new Renderer()
-        
-        // const glObject = new GLObject(0, shaderProgram, gl)
-        // glObject.setVertexArray(triangleData)
-        // glObject.setColorArray([1.0, 0.0, 0.0, 1.0])
-        // renderer.addObject(glObject)
-        
-        // const glObject2 = new GLObject(1, shaderProgram, gl)
-        // glObject2.setVertexArray([400, 0, 400, 200, 200, 0])
-        // glObject2.setPoints([400, 0, 400, 200, 200, 0])
-        // glObject2.setColorArray([0.0, 1.0, 0.0, 1.0])
-        // renderer.addObject(glObject2)
-        // objects.push(glObject2);
-        
-        // const glObject3 = new GLObject(1, shaderProgram, gl)
-        // glObject3.setVertexArray([200, 200, 0, 200, 200, 0])
-        // glObject3.setColorArray([0.0, 0.0, 1.0, 1.0])
-        // renderer.addObject(glObject3)
-        
-        // const glObject4 = new GLObject(1, shaderProgram, gl)
-        // glObject4.setVertexArray([0, 400, 0, 200, 200, 400])
-        // glObject4.setColorArray([1.0, 1.0, 0.0, 1.0])
-        // renderer.addObject(glObject4)
-
-        const glObject5 = new Polygon(1, shaderProgram, gl);
-        glObject5.setPoints([100, 50, 300, 50, 370, 250, 200, 370, 30, 250]);
-        glObject5.setColorArray([0.251, 0.624, 1.0, 1.0]);
-        renderer.addObject(glObject5);
-        objects.push(glObject5);
-
-        const glObjectLine = new Line(2, shaderProgram, gl);
-        glObjectLine.setPoints([100, 50, 300, 75]);
-        glObjectLine.setColorArray([1,0,0,1]);
-        renderer.addObject(glObjectLine);
-        objects.push(glObjectLine);
-
-        drawPBtn.addEventListener("click", function(e){
-            // Button to trigger polygon drawing.
-            if (currentTool == Tool.DRAW && currentShape == Shape.POLYGON){
-                if(drawnVert.length < 6){
-                    alert("Letakan 3 titik atau lebih untuk membuat polygon.");
-                    resetDrawingTool();
-                } else {
-                    drawShape(new Polygon(id, shaderProgram, gl), drawnVert);
-                }
-            }
-            
-        });
-
-        canvas.addEventListener("mousedown", function(e){
-            if (doneDrawing){
-                drawShape(new Line(id, shaderProgram, gl), drawnVert);
-            }
-        })
-        
-        function render(now: number) {
-            gl.clearColor(1,1,1,1);
-            gl.clear(gl.COLOR_BUFFER_BIT);
-
-            renderer.render();
-            requestAnimationFrame(render);
-        }
-
-        requestAnimationFrame(render);
-    }
-    
-    main()
-
-    canvas.onmousedown = function (event) {
-        const bound = canvas.getBoundingClientRect();
-        const mousePos = {
-            x: event.clientX - bound.left,
-            y: bound.bottom - event.clientY
-        };
-        console.log(mousePos);
-
-        if (currentTool === Tool.MOVE) {
-            onMoveStart(mousePos);
-        }
-
-        if (currentTool === Tool.DRAW){
-            onDrawStart(mousePos);
-        }
-
-        if (currentTool === Tool.COLOR){
-            onColoring(mousePos);
-        }
-    
-        mouseIsDown = true;
+  async function main() {
+    if (!gl) {
+      alert("Your browser does not support WebGL");
+      return;
     }
 
-    canvas.onmousemove = function(event){
-        const bound = canvas.getBoundingClientRect();
-        const mousePos = {
-            x: event.clientX - bound.left,
-            y: bound.bottom - event.clientY
-        };
+    const triangleData = [200.0, 200.0, 400.0, 200.0, 200.0, 400.0];
 
-        // On Mouse Move (regardless of mouse down)
+    const shaderProgram = await initShaderFiles(gl, "vert.glsl", "frag.glsl");
+    const yellowShader = await initShaderFiles(
+      gl,
+      "vert.glsl",
+      "frag-yellow.glsl"
+    );
 
-        if(!mouseIsDown) return;
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-        // On Drag
-        if (currentTool === Tool.MOVE) {
-            onMoveHold(mousePos);
-        }
+    currentColor = [0, 0, 0, 1];
 
-        return;
-    }
+    //renderer = new Renderer()
 
-    canvas.onmouseup = function(event){
-        // if(mouseIsDown) mouseClick(e);
-    
-        mouseIsDown = false;
-    }
+    // const glObject = new GLObject(0, shaderProgram, gl)
+    // glObject.setVertexArray(triangleData)
+    // glObject.setColorArray([1.0, 0.0, 0.0, 1.0])
+    // renderer.addObject(glObject)
 
-    function onDrawStart(mousePos : { x:number, y:number }) {
-        drawnVert.push(mousePos.x);
-        drawnVert.push(mousePos.y);
-        console.log(drawnVert);
-        if (currentShape === Shape.POLYGON) {
-            //console.log(drawnVert);
-        } else if (currentShape === Shape.LINE){
-            if (drawnVert.length >= 4){
-                doneDrawing = true;
-            }
-        }
-    }
+    // const glObject2 = new GLObject(1, shaderProgram, gl)
+    // glObject2.setVertexArray([400, 0, 400, 200, 200, 0])
+    // glObject2.setPoints([400, 0, 400, 200, 200, 0])
+    // glObject2.setColorArray([0.0, 1.0, 0.0, 1.0])
+    // renderer.addObject(glObject2)
+    // objects.push(glObject2);
 
-    function onMoveStart(mousePos : { x:number, y:number }) {
-        findNearest(mousePos);
-    }
+    // const glObject3 = new GLObject(1, shaderProgram, gl)
+    // glObject3.setVertexArray([200, 200, 0, 200, 200, 0])
+    // glObject3.setColorArray([0.0, 0.0, 1.0, 1.0])
+    // renderer.addObject(glObject3)
 
-    function onMoveHold(mousePos : { x:number, y:number }) {
-        if (selectedObject !== undefined) {
-            selectedObject.onPointDrag(selectedPoint, mousePos);
-        }
-    }
+    // const glObject4 = new GLObject(1, shaderProgram, gl)
+    // glObject4.setVertexArray([0, 400, 0, 200, 200, 400])
+    // glObject4.setColorArray([1.0, 1.0, 0.0, 1.0])
+    // renderer.addObject(glObject4)
 
-    function onColoring(mousePos : {x:number, y:number}){
-        findNearest(mousePos);
+    const glObject5 = new Polygon(1, shaderProgram, gl);
+    glObject5.setPoints([100, 50, 300, 50, 370, 250, 200, 370, 30, 250]);
+    glObject5.setColorArray([0.251, 0.624, 1.0, 1.0]);
+    renderer.addObject(glObject5);
+    objects.push(glObject5);
 
-        if (selectedObject !== undefined){
-            selectedObject.setColorArray(currentColor);
+    const glObjectLine = new Line(2, shaderProgram, gl);
+    glObjectLine.setPoints([100, 50, 300, 75]);
+    glObjectLine.setColorArray([1, 0, 0, 1]);
+    renderer.addObject(glObjectLine);
+    objects.push(glObjectLine);
+
+    drawPBtn.addEventListener("click", function (e) {
+      // Button to trigger polygon drawing.
+      if (currentTool == Tool.DRAW && currentShape == Shape.POLYGON) {
+        if (drawnVert.length < 6) {
+          alert("Letakan 3 titik atau lebih untuk membuat polygon.");
+          resetDrawingTool();
         } else {
-            alert("Pilih titik dari bentuk yang ingin diwarnai.")
+          drawShape(new Polygon(id, shaderProgram, gl), drawnVert);
         }
-    }
+      }
+    });
 
-    function findNearest(mPos : { x:number, y:number }){
-        const nearestDistance = 30;
-        let nearestDistanceSquared: number = nearestDistance * nearestDistance;
-        let nearestObject: GLObject;
-        let nearestPoint: number;
-        
-        objects.forEach(object => {
-            for (let i = 0; i < object.pts.length / 2; i++) {
-                console.log("test");
-                const pt = { x: object.pts[2*i], y: object.pts[2*i+1] };
-                let distanceSquared = Math.pow(mPos.x - pt.x, 2) + Math.pow(mPos.y - pt.y, 2);
-                if (nearestDistanceSquared > distanceSquared) {
-                    nearestDistanceSquared = distanceSquared;
-                    nearestObject = object;
-                    nearestPoint = i;
-                }
+    canvas.addEventListener("mousedown", function (e) {
+      if (doneDrawing) {
+        if (Shape.LINE) {
+          drawShape(new Line(id, shaderProgram, gl), drawnVert);
+        } else if (Shape.SQUARE) {
+          let vertArray = [];
+          vertArray.push(drawnVert[0]);
+          vertArray.push(drawnVert[1]);
+          console.log(vertArray);
+
+          let distX = drawnVert[2] - drawnVert[0];
+          let distY = drawnVert[3] - drawnVert[1];
+
+          let size;
+          if (distX < distY) {
+            size = distX;
+          } else {
+            size = distY;
+          }
+
+          if ((distX > 0 && distY > 0) || (distX < 0 && distY < 0)) {
+            // size sudah benar
+            vertArray.push(drawnVert[0]);
+            vertArray.push(drawnVert[1] + size);
+            for (let i = 0; i < 2; i++) {
+              vertArray.push(drawnVert[0] + size);
+              vertArray.push(drawnVert[1]);
             }
-        });
-        console.log("well", selectedObject);
-        
-        selectedObject = nearestObject;
-        selectedPoint = nearestPoint;
+            vertArray.push(drawnVert[0] + size);
+            vertArray.push(drawnVert[1] + size);
+            vertArray.push(drawnVert[0]);
+            vertArray.push(drawnVert[1] + size);
+          } else {
+            if (distX > 0 && distY < 0) {
+              size = -size;
+            }
+            vertArray.push(drawnVert[0]);
+            vertArray.push(drawnVert[1] - size);
+            for (let i = 0; i < 2; i++) {
+              vertArray.push(drawnVert[0] + size);
+              vertArray.push(drawnVert[1]);
+            }
+            vertArray.push(drawnVert[0] + size);
+            vertArray.push(drawnVert[1] - size);
+            vertArray.push(drawnVert[0]);
+            vertArray.push(drawnVert[1] - size);
+            //}
+          }
 
-        console.log("Nearest Object: " + nearestObject + " Nearest point: " + nearestPoint);
-    
+          console.log(vertArray);
+          //drawnVert[4] = vertArray[1] + size;
+
+          drawShape(new Square(id, shaderProgram, gl), vertArray);
+        }
+      }
+    });
+
+    function render(now: number) {
+      gl.clearColor(1, 1, 1, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      renderer.render();
+      requestAnimationFrame(render);
     }
 
-    function drawShape(newObj, vertList){
-        newObj.setPoints(vertList);
-        newObj.setColorArray(currentColor);
-        renderer.addObject(newObj);
-        objects.push(newObj);
-        id++;
-        resetDrawingTool();
+    requestAnimationFrame(render);
+  }
+
+  main();
+
+  canvas.onmousedown = function (event) {
+    const bound = canvas.getBoundingClientRect();
+    const mousePos = {
+      x: event.clientX - bound.left,
+      y: bound.bottom - event.clientY,
+    };
+    console.log(mousePos);
+
+    if (currentTool === Tool.MOVE) {
+      onMoveStart(mousePos);
     }
 
-    function resetDrawingTool(){
-        drawnVert = [];
-        doneDrawing = false;
+    if (currentTool === Tool.DRAW) {
+      onDrawStart(mousePos);
     }
-}
+
+    if (currentTool === Tool.COLOR) {
+      onColoring(mousePos);
+    }
+
+    mouseIsDown = true;
+  };
+
+  canvas.onmousemove = function (event) {
+    const bound = canvas.getBoundingClientRect();
+    const mousePos = {
+      x: event.clientX - bound.left,
+      y: bound.bottom - event.clientY,
+    };
+
+    // On Mouse Move (regardless of mouse down)
+
+    if (!mouseIsDown) return;
+
+    // On Drag
+    if (currentTool === Tool.MOVE) {
+      onMoveHold(mousePos);
+    }
+
+    return;
+  };
+
+  canvas.onmouseup = function (event) {
+    // if(mouseIsDown) mouseClick(e);
+
+    mouseIsDown = false;
+  };
+
+  function onDrawStart(mousePos: { x: number; y: number }) {
+    drawnVert.push(mousePos.x);
+    drawnVert.push(mousePos.y);
+    console.log(drawnVert);
+    if (currentShape === Shape.POLYGON) {
+      //console.log(drawnVert);
+    } else if (currentShape === Shape.LINE) {
+      if (drawnVert.length >= 4) {
+        doneDrawing = true;
+      }
+    } else if (currentShape == Shape.SQUARE) {
+      if (drawnVert.length >= 4) {
+        doneDrawing = true;
+      }
+    }
+  }
+
+  function onMoveStart(mousePos: { x: number; y: number }) {
+    findNearest(mousePos);
+  }
+
+  function onMoveHold(mousePos: { x: number; y: number }) {
+    if (selectedObject !== undefined) {
+      selectedObject.onPointDrag(selectedPoint, mousePos);
+    }
+  }
+
+  function onColoring(mousePos: { x: number; y: number }) {
+    findNearest(mousePos);
+
+    if (selectedObject !== undefined) {
+      selectedObject.setColorArray(currentColor);
+    } else {
+      alert("Pilih titik dari bentuk yang ingin diwarnai.");
+    }
+  }
+
+  function findNearest(mPos: { x: number; y: number }) {
+    const nearestDistance = 30;
+    let nearestDistanceSquared: number = nearestDistance * nearestDistance;
+    let nearestObject: GLObject;
+    let nearestPoint: number;
+
+    objects.forEach((object) => {
+      for (let i = 0; i < object.pts.length / 2; i++) {
+        console.log("test");
+        const pt = { x: object.pts[2 * i], y: object.pts[2 * i + 1] };
+        let distanceSquared =
+          Math.pow(mPos.x - pt.x, 2) + Math.pow(mPos.y - pt.y, 2);
+        if (nearestDistanceSquared > distanceSquared) {
+          nearestDistanceSquared = distanceSquared;
+          nearestObject = object;
+          nearestPoint = i;
+        }
+      }
+    });
+    console.log("well", selectedObject);
+
+    selectedObject = nearestObject;
+    selectedPoint = nearestPoint;
+
+    console.log(
+      "Nearest Object: " + nearestObject + " Nearest point: " + nearestPoint
+    );
+  }
+
+  function drawShape(newObj, vertList) {
+    newObj.setPoints(vertList);
+    newObj.setColorArray(currentColor);
+    renderer.addObject(newObj);
+    objects.push(newObj);
+    id++;
+    resetDrawingTool();
+  }
+
+  function resetDrawingTool() {
+    drawnVert = [];
+    doneDrawing = false;
+  }
+};
