@@ -39,17 +39,19 @@ window.onload = function() {
 
     // input variables
     var mouseIsDown;
-    var drawnObj;
     var drawnVert = []
     var id=2;
+    var doneDrawing = false;
 
     const renderer = new Renderer();
 
     toolPicker.onclick = function () {
         currentTool = toolPicker.selectedIndex;
+        resetDrawingTool();
     };
     shapePicker.onclick = function () {
         currentShape = shapePicker.selectedIndex;
+        resetDrawingTool();
     };
     colorPicker.oninput = function () {
         const colStr = colorPicker.value.match(/[\d\w]{1,2}/g);
@@ -111,7 +113,7 @@ window.onload = function() {
         objects.push(glObject5);
 
         const glObjectLine = new Line(0, shaderProgram, gl);
-        glObjectLine.setPoints([100, 50, 300, 50]);
+        glObjectLine.setPoints([100, 50, 300, 75]);
         glObjectLine.setColorArray([1,0,0,1]);
         renderer.addObject(glObjectLine);
         objects.push(glObjectLine);
@@ -121,18 +123,19 @@ window.onload = function() {
             if (currentTool == Tool.DRAW && currentShape == Shape.POLYGON){
                 if(drawnVert.length < 6){
                     alert("Letakan 3 titik atau lebih untuk membuat polygon.");
+                    drawnVert = [];
                 } else {
-                    drawnObj = new Polygon(id, shaderProgram, gl);
-                    drawnObj.setPoints(drawnVert);
-                    drawnObj.setColorArray(currentColor);
-                    renderer.addObject(drawnObj);
-                    objects.push(drawnObj);
-                    id++;
+                    drawShape(new Polygon(id, shaderProgram, gl), drawnVert);
                 }
-                drawnVert = [];
             }
             
         });
+
+        canvas.addEventListener("mousedown", function(e){
+            if (doneDrawing){
+                drawShape(new Line(id, shaderProgram, gl), drawnVert);
+            }
+        })
         
         function render(now: number) {
             gl.clearColor(1,1,1,1);
@@ -195,10 +198,15 @@ window.onload = function() {
     }
 
     function onDrawStart(mousePos : { x:number, y:number }) {
+        drawnVert.push(mousePos.x);
+        drawnVert.push(mousePos.y);
+        console.log(drawnVert);
         if (currentShape === Shape.POLYGON) {
-            drawnVert.push(mousePos.x);
-            drawnVert.push(mousePos.y);
             //console.log(drawnVert);
+        } else if (currentShape === Shape.LINE){
+            if (drawnVert.length >= 4){
+                doneDrawing = true;
+            }
         }
     }
 
@@ -231,5 +239,19 @@ window.onload = function() {
         if (selectedObject !== undefined) {
             selectedObject.onPointDrag(selectedPoint, mousePos);
         }
+    }
+
+    function drawShape(newObj, vertList){
+        newObj.setPoints(vertList);
+        newObj.setColorArray(currentColor);
+        renderer.addObject(newObj);
+        objects.push(newObj);
+        id++;
+        resetDrawingTool();
+    }
+
+    function resetDrawingTool(){
+        drawnVert = [];
+        doneDrawing = false;
     }
 }
