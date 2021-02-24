@@ -1,6 +1,7 @@
 import { initShaderFiles } from './utils/shader';
 import GLObject from './GLObject';
 import Polygon from './Polygon';
+import Line from './Line';
 import Renderer from './renderer';
 
 const Tool = {
@@ -109,6 +110,11 @@ window.onload = function() {
         renderer.addObject(glObject5);
         objects.push(glObject5);
 
+        const glObjectLine = new Line(0, shaderProgram, gl);
+        glObjectLine.setPoints([100, 50, 300, 50]);
+        glObjectLine.setColorArray([1,0,0,1]);
+        renderer.addObject(glObjectLine);
+        objects.push(glObjectLine);
 
         drawPBtn.addEventListener("click", function(e){
             // Button to trigger polygon drawing.
